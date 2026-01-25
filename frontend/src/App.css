@@ -1,0 +1,27 @@
+/* Make sure body and html take full width and height */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* vertical center */
+  align-items: center;     /* horizontal center */
+  height: 100vh;           /* full viewport height */
+  width: 100vw;            /* full viewport width */
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+.assistant-box {
+  padding: 30px;
+  width: 400px;             /* fixed width */
+  max-width: 90%;           /* responsive on small screens */
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
