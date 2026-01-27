@@ -17,6 +17,7 @@ body, html {
   text-align: center;
 }
 
+
 .assistant-box {
   padding: 30px;
   width: 400px;             /* fixed width */
@@ -24,4 +25,18 @@ body, html {
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   background-color: #fff;
+}
+.app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+}
+
+button {
+  padding: 12px 20px;
+  font-size: 18px;
+  cursor: pointer;
 }
