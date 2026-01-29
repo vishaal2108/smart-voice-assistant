@@ -1,8 +1,13 @@
-const MicButton = ({ onClick }) => {
+import React from "react";
+
+const MicButton = ({ onClick, onStop }) => {
   return (
-    <button onClick={onClick} style={{ padding: "12px 20px", fontSize: "16px", cursor: "pointer" }}>
-      🎤 Speak
-    </button>
+    <div>
+      <button onClick={onClick}>🎤 Start</button>
+      <button onClick={onStop} style={{ marginLeft: "10px", backgroundColor: "red", color: "white" }}>
+        🛑 Stop
+      </button>
+    </div>
   );
 };
 
