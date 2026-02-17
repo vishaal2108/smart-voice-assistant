@@ -121,9 +121,9 @@
 			"typeName": "shape"
 		},
 		{
-			"x": 163.153736334263,
-			"y": 100.67331064741467,
-			"z": 0.8226867555576587,
+			"x": 51.85949925208672,
+			"y": 219.99503045485312,
+			"z": 0.6566198633006856,
 			"meta": {},
 			"id": "camera:page:page",
 			"typeName": "camera"
@@ -206,10 +206,8 @@
 		{
 			"editingShapeId": null,
 			"croppingShapeId": null,
-			"selectedShapeIds": [
-				"shape:MJgdoKccqFe4RlgQurYAo"
-			],
-			"hoveredShapeId": "shape:MJgdoKccqFe4RlgQurYAo",
+			"selectedShapeIds": [],
+			"hoveredShapeId": null,
 			"erasingShapeIds": [],
 			"hintingShapeIds": [],
 			"focusedGroupId": null,
@@ -396,50 +394,6 @@
 			"typeName": "shape"
 		},
 		{
-			"x": 230.46793825683596,
-			"y": 90.00001907348633,
-			"rotation": 0,
-			"isLocked": false,
-			"opacity": 1,
-			"meta": {},
-			"id": "shape:l6g859B7kEEJxTrrhWyRD",
-			"type": "arrow",
-			"props": {
-				"kind": "arc",
-				"elbowMidPoint": 0.5,
-				"dash": "draw",
-				"size": "xl",
-				"fill": "pattern",
-				"color": "black",
-				"labelColor": "black",
-				"bend": 0,
-				"start": {
-					"x": 0,
-					"y": 0
-				},
-				"end": {
-					"x": 667.3333740234375,
-					"y": -2
-				},
-				"arrowheadStart": "none",
-				"arrowheadEnd": "arrow",
-				"richText": {
-					"type": "doc",
-					"content": [
-						{
-							"type": "paragraph"
-						}
-					]
-				},
-				"labelPosition": 0.5,
-				"font": "draw",
-				"scale": 1
-			},
-			"parentId": "shape:SoXYg2RDEfCFU2CuRgGpo",
-			"index": "aBUP3reG",
-			"typeName": "shape"
-		},
-		{
 			"x": 693.8013733154297,
 			"y": 247.00001907348633,
 			"rotation": 0,
@@ -606,12 +560,7 @@
 		{
 			"followingUserId": null,
 			"opacityForNextShape": 1,
-			"stylesForNextShape": {
-				"tldraw:fill": "pattern",
-				"tldraw:color": "black",
-				"tldraw:geo": "arrow-left",
-				"tldraw:size": "xl"
-			},
+			"stylesForNextShape": {},
 			"brush": null,
 			"scribbles": [],
 			"cursor": {
@@ -625,7 +574,7 @@
 			"screenBounds": {
 				"x": 0,
 				"y": 0,
-				"w": 1220,
+				"w": 920,
 				"h": 638
 			},
 			"insets": [

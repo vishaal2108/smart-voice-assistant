@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const Timetable = require("../models/Timetable");
+const Fee = require("../models/Fee");
+const Placement = require("../models/Placement");
+const Notice = require("../models/Notice");
 
 // POST /api/command
 router.post("/", async (req, res) => {
@@ -48,16 +51,41 @@ router.post("/", async (req, res) => {
         response += `${item.time}: ${item.subject}\n`;
       });
     }
+    // Fees query
+  } else if (cmd.includes("fee") || cmd.includes("fees")) {
 
-  // Placements query
+    const fee = await Fee.findOne();
+
+    if (!fee) {
+      response = "No fee details available.";
+    } else {
+      response = `The total fee is ${fee.totalFee} rupees. Due date is ${fee.dueDate}.`;
+    }
+
+   // Placement query (Dynamic from DB)
   } else if (
     cmd.includes("placement") ||
     cmd.includes("drive") ||
-    cmd.includes("placements") ||
-    cmd.includes("placement drive")
+    cmd.includes("placements")
   ) {
-    // Updated placement details
-    response = "Your next placement drive is on 25th December 2026 at Infosys.";
+
+    const placement = await Placement.findOne().sort({ _id: -1 });
+
+    if (!placement) {
+      response = "No placement updates available.";
+    } else {
+      response = `Latest placement drive is from ${placement.companyName} offering ${placement.package}. Eligibility: ${placement.eligibility}. Date: ${placement.date}`;
+    }
+  // Notice query
+  } else if (cmd.includes("notice") || cmd.includes("notices")) {
+
+    const notice = await Notice.findOne().sort({ _id: -1 });
+
+    if (!notice) {
+      response = "No notices available.";
+    } else {
+      response = `Latest notice: ${notice.title}. ${notice.content}`;
+    }
 
   // Current time
   } else if (cmd.includes("time")) {
