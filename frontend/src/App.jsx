@@ -1,22 +1,27 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import StudentLogin from "./pages/StudentLogin";
 import StaffLogin from "./pages/StaffLogin";
 import ProtectedRoute from "./components/ProtectedRoute";
 import StaffPanel from "./pages/StaffPanel";
-import VoiceInput from "./components/VoiceInput";   // add at top
-// Simple Home Page
+import VoiceInput from "./components/VoiceInput";
+import "./App.css"; // Make sure this is imported
+
+// ✅ Centered Home Page
 function Home() {
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h2>Smart College Assistant</h2>
-      <p>Select Login Type</p>
-      <a href="/student-login">Student Login</a> |{" "}
-      <a href="/staff-login">Staff Login</a>
+    <div className="home-wrapper">
+      <div className="home-card">
+        <h2>Smart College Assistant</h2>
+        <p>Select Login Type</p>
+
+        <div className="home-links">
+          <Link to="/student-login">Student Login</Link>
+          <Link to="/staff-login">Staff Login</Link>
+        </div>
+      </div>
     </div>
   );
 }
-
-
 
 function StudentDashboard() {
   return (
@@ -25,11 +30,6 @@ function StudentDashboard() {
       <VoiceInput />
     </div>
   );
-}
-
-
-function StaffDashboard() {
-  return <h2>Welcome Staff 👩‍🏫</h2>;
 }
 
 function App() {
@@ -50,14 +50,13 @@ function App() {
         />
 
         <Route
-  path="/staff-dashboard"
-  element={
-    <ProtectedRoute role="staff">
-      <StaffPanel />
-    </ProtectedRoute>
-  }
-/>
-
+          path="/staff-dashboard"
+          element={
+            <ProtectedRoute role="staff">
+              <StaffPanel />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );
