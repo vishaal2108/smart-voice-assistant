@@ -1,0 +1,40 @@
+const express = require("express");
+const router = express.Router();
+const Fee = require("../models/Fee");
+const Placement = require("../models/Placement");
+const Notice = require("../models/Notice");
+const Circular = require("../models/Circular");
+const { authenticateToken, authorizeRoles } = require("../middleware/authMiddleware");
+
+const createResourceRoutes = (path, Model) => {
+  router.post(
+    path,
+    authenticateToken,
+    authorizeRoles("staff"),
+    async (req, res) => {
+      try {
+        const doc = new Model(req.body);
+        await doc.save();
+        return res.status(201).json({ message: `${Model.modelName} added`, data: doc });
+      } catch (error) {
+        return res.status(500).json({ message: "Server error" });
+      }
+    }
+  );
+
+  router.get(path, async (req, res) => {
+    try {
+      const docs = await Model.find().sort({ _id: -1 });
+      return res.json(docs);
+    } catch (error) {
+      return res.status(500).json({ message: "Server error" });
+    }
+  });
+};
+
+createResourceRoutes("/fees", Fee);
+createResourceRoutes("/placements", Placement);
+createResourceRoutes("/notices", Notice);
+createResourceRoutes("/circulars", Circular);
+
+module.exports = router;

@@ -18,10 +18,11 @@ function StaffLogin() {
     const data = await res.json();
 
     if (res.ok) {
-      localStorage.setItem("role", "staff");
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.user.role);
       navigate("/staff-dashboard");
     } else {
-      alert(data.message);
+      alert(data.message || "Login failed");
     }
   };
 
@@ -29,10 +30,20 @@ function StaffLogin() {
     <div>
       <h2>Staff Login</h2>
       <form onSubmit={handleLogin}>
-        <input type="email" placeholder="Email"
-          value={email} onChange={(e) => setEmail(e.target.value)} required />
-        <input type="password" placeholder="Password"
-          value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
         <button type="submit">Login</button>
       </form>
     </div>
