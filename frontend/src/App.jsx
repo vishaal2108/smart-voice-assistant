@@ -3,10 +3,9 @@ import StudentLogin from "./pages/StudentLogin";
 import StaffLogin from "./pages/StaffLogin";
 import ProtectedRoute from "./components/ProtectedRoute";
 import StaffPanel from "./pages/StaffPanel";
-import VoiceInput from "./components/VoiceInput";
-import "./App.css"; // Make sure this is imported
+import StudentDashboard from "./pages/StudentDashboard";
+import "./App.css";
 
-// ✅ Centered Home Page
 function Home() {
   return (
     <div className="home-wrapper">
@@ -19,15 +18,6 @@ function Home() {
           <Link to="/staff-login">Staff Login</Link>
         </div>
       </div>
-    </div>
-  );
-}
-
-function StudentDashboard() {
-  return (
-    <div style={{ textAlign: "center", marginTop: "30px" }}>
-      <h2>Student Voice Assistant 🎓</h2>
-      <VoiceInput />
     </div>
   );
 }

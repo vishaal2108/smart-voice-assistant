@@ -1,0 +1,65 @@
+.wrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0b3d91, #0f766e);
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+}
+
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  color: #ffffff;
+  font-size: 28px;
+  margin: 0;
+}
+
+.logoutButton {
+  border: 0;
+  border-radius: 6px;
+  background: #dc2626;
+  color: #ffffff;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+.voiceCard {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 18px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.voiceCard h3 {
+  margin: 0;
+  color: #0b3d91;
+}
+
+.voiceHint {
+  margin: 8px 0 16px;
+  color: #475569;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .topBar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+}

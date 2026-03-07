@@ -1,5 +1,7 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import styles from "./AuthPage.module.css";
 
 function StudentLogin() {
   const [email, setEmail] = useState("");
@@ -27,10 +29,15 @@ function StudentLogin() {
   };
 
   return (
-    <div>
-      <h2>Student Login</h2>
-      <form onSubmit={handleLogin}>
+    <div className={styles.authPage}>
+      <div className={styles.authCard}>
+        <span className={styles.tag}>Student Portal</span>
+        <h2 className={styles.title}>Student Login</h2>
+        <p className={styles.subtitle}>Access your dashboard and voice assistant.</p>
+
+        <form className={styles.form} onSubmit={handleLogin}>
         <input
+          className={styles.input}
           type="email"
           placeholder="Email"
           value={email}
@@ -38,14 +45,20 @@ function StudentLogin() {
           required
         />
         <input
+          className={styles.input}
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">Login</button>
-      </form>
+          <button className={styles.submitBtn} type="submit">Login</button>
+        </form>
+
+        <p className={styles.backRow}>
+          Go back to <Link className={styles.backLink} to="/">login selection</Link>
+        </p>
+      </div>
     </div>
   );
 }

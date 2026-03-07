@@ -1,0 +1,68 @@
+.wrapper {
+  width: 100%;
+  max-width: 860px;
+}
+
+.responseCard {
+  margin-bottom: 14px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #dbeafe;
+}
+
+.label {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f766e;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.queryText {
+  margin: 0 0 12px;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.replyText {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+  color: #1e293b;
+  font-family: inherit;
+  font-size: 15px;
+}
+
+.buttonRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.startButton {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(120deg, #0f766e, #1e40af);
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.stopButton {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  background: #dc2626;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.startButton:hover,
+.stopButton:hover {
+  filter: brightness(1.06);
+}

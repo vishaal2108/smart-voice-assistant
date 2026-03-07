@@ -1,13 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
+import styles from "./VoiceInput.module.css";
 
 const VoiceInput = () => {
   const [youSaid, setYouSaid] = useState(""); // what user speaks
   const [assistantReply, setAssistantReply] = useState(""); // reply text
+  const [isListening, setIsListening] = useState(false);
+  const [showResult, setShowResult] = useState(false);
   const recognitionRef = useRef(null);
 
   useEffect(() => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      return;
+    }
+
     recognitionRef.current = new SpeechRecognition();
     recognitionRef.current.continuous = false;
     recognitionRef.current.interimResults = false;
@@ -15,19 +22,34 @@ const VoiceInput = () => {
     recognitionRef.current.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       setYouSaid(transcript);
+      setShowResult(true);
       sendCommand(transcript);
+    };
+
+    recognitionRef.current.onend = () => {
+      setIsListening(false);
     };
   }, []);
 
   const startListening = () => {
+    if (!recognitionRef.current) {
+      alert("Speech recognition is not supported in this browser.");
+      return;
+    }
+
+    setIsListening(true);
     recognitionRef.current.start();
   };
 
   const stopListening = () => {
-    recognitionRef.current.stop();
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
     window.speechSynthesis.cancel(); // stop any ongoing speech
+    setIsListening(false);
     setYouSaid(""); // clear "You said"
     setAssistantReply(""); // clear reply container
+    setShowResult(false);
   };
 
   const sendCommand = async (command) => {
@@ -41,6 +63,7 @@ const VoiceInput = () => {
       setAssistantReply(data.reply); // show in UI
       speakResponse(data.reply);
     } catch (err) {
+      setAssistantReply("Something went wrong while fetching voice response.");
       console.error(err);
     }
   };
@@ -51,66 +74,30 @@ const VoiceInput = () => {
   };
 
   return (
-    <div style={{ width: "400px", margin: "50px auto", textAlign: "center" }}>
-      {/* User said */}
-      <textarea
-        value={youSaid}
-        placeholder="You said..."
-        readOnly
-        rows={3}
-        style={{
-          width: "100%",
-          marginBottom: "10px",
-          fontSize: "16px",
-          backgroundColor: "#f0f0f0",
-          color: "#333",
-          padding: "10px",
-          borderRadius: "5px",
-          border: "1px solid #ccc"
-        }}
-      />
+    <div className={styles.wrapper}>
+      {showResult && (
+        <div className={styles.responseCard}>
+          <p className={styles.label}>You asked</p>
+          <p className={styles.queryText}>{youSaid}</p>
 
-      {/* Assistant reply (timetable output) */}
-      <textarea
-        value={assistantReply}
-        placeholder="Assistant reply..."
-        readOnly
-        rows={8}
-        style={{
-          width: "100%",
-          marginBottom: "10px",
-          fontSize: "16px",
-          backgroundColor: "#f0f0f0", // same as input
-          color: "#333",
-          padding: "10px",
-          borderRadius: "5px",
-          border: "1px solid #ccc",
-          whiteSpace: "pre-wrap", // preserve new lines
-        }}
-      />
+          <p className={styles.label}>Assistant reply</p>
+          <pre className={styles.replyText}>{assistantReply}</pre>
+        </div>
+      )}
 
-      {/* Buttons */}
-      <div>
+      <div className={styles.buttonRow}>
         <button
           onClick={startListening}
-          style={{ padding: "10px 20px", fontSize: "16px" }}
+          className={styles.startButton}
         >
-           Start
+          {isListening ? "Listening..." : "Start"}
         </button>
 
         <button
           onClick={stopListening}
-          style={{
-            padding: "10px 20px",
-            fontSize: "16px",
-            marginLeft: "10px",
-            backgroundColor: "red",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-          }}
+          className={styles.stopButton}
         >
-           Stop
+          Stop
         </button>
       </div>
     </div>
