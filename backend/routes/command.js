@@ -4,6 +4,30 @@ const Timetable = require("../models/Timetable");
 const Fee = require("../models/Fee");
 const Placement = require("../models/Placement");
 const Notice = require("../models/Notice");
+const StaffAssignment = require("../models/StaffAssignment");
+
+const SUBJECT_KEYWORDS = [
+  "ai/ml",
+  "big data",
+  "cloud computing",
+  "data science",
+  "data structures",
+  "fullstack",
+  "network security",
+  "oops",
+  "web development",
+];
+
+const normalizeText = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+
+const extractSubjectFromCommand = (command) => {
+  const cmd = normalizeText(command);
+  return SUBJECT_KEYWORDS.find((subject) => cmd.includes(subject)) || "";
+};
 
 // POST /api/command
 router.post("/", async (req, res) => {
@@ -19,6 +43,41 @@ router.post("/", async (req, res) => {
   // Hello greeting
   if (cmd.includes("hello")) {
     response = "Hello , how can I help you?";
+  } else if (
+    cmd.includes("staff") ||
+    cmd.includes("faculty") ||
+    cmd.includes("teacher") ||
+    cmd.includes("who handles") ||
+    cmd.includes("who teaches") ||
+    cmd.includes("who is taking")
+  ) {
+    if (cmd.includes("padmavathi") || cmd.includes("hod")) {
+      response = "Dr.V.Padmavathi is the HOD and she is not currently assigned to a subject.";
+    } else {
+      const subject = extractSubjectFromCommand(cmd);
+      const assignments = await StaffAssignment.find().sort({ subject: 1 });
+
+      if (!subject) {
+        if (assignments.length === 0) {
+          response = "No staff assignment details are available right now.";
+        } else {
+          response = "Current staff assignments are:\n";
+          assignments.forEach((item) => {
+            response += `${item.subject}: ${item.staffName}\n`;
+          });
+        }
+      } else {
+        const match = assignments.find(
+          (item) => normalizeText(item.subject) === normalizeText(subject)
+        );
+
+        if (!match) {
+          response = `I could not find staff assignment for ${subject}.`;
+        } else {
+          response = `${match.subject} is handled by ${match.staffName}.`;
+        }
+      }
+    }
 
   // Timetable query
   } else if (cmd.includes("timetable") || cmd.includes("time table") || cmd.includes("schedule")) {

@@ -5,6 +5,7 @@ const connectDB = require("./config/db");
 const timetableRoutes = require("./routes/timetableRoutes");
 const authRoutes = require("./routes/authRoutes");
 const contentRoutes = require("./routes/contentRoutes");
+const academicsRoutes = require("./routes/academicsRoutes");
 
 const app = express();
 const PORT = 5000;
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use("/api", authRoutes);
 app.use("/api", timetableRoutes);
 app.use("/api", contentRoutes);
+app.use("/api", academicsRoutes);
 app.use("/api/command", commandRoute);
 
 app.get("/", (req, res) => {

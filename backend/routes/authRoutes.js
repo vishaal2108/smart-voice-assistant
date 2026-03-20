@@ -73,8 +73,8 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    if (!["student", "staff"].includes(role)) {
-      return res.status(400).json({ message: "Role must be student or staff" });
+    if (!["student", "staff", "parent"].includes(role)) {
+      return res.status(400).json({ message: "Role must be student, staff or parent" });
     }
 
     const existingUser = await User.findOne({ email });
@@ -101,5 +101,6 @@ router.post("/register", async (req, res) => {
 
 router.post("/login/student", loginByRole("student"));
 router.post("/login/staff", loginByRole("staff"));
+router.post("/login/parent", loginByRole("parent"));
 
 module.exports = router;

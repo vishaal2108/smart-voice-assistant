@@ -3,11 +3,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
   padding: 24px;
   background:
     radial-gradient(circle at 10% 20%, rgba(45, 212, 191, 0.22), transparent 30%),
     radial-gradient(circle at 92% 82%, rgba(30, 64, 175, 0.28), transparent 42%),
     linear-gradient(140deg, #0a2540 0%, #153f6d 55%, #135f5c 100%);
+}
+
+.home-logo {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 4px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
 }
 
 .home-card {
@@ -56,6 +70,13 @@
 }
 
 @media (max-width: 640px) {
+  .home-logo {
+    width: 58px;
+    height: 58px;
+    top: 12px;
+    right: 12px;
+  }
+
   .home-card {
     padding: 28px 20px;
   }

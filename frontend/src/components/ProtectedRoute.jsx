@@ -23,7 +23,12 @@ function ProtectedRoute({ children, role }) {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
 
-    const loginPath = role === "staff" ? "/staff-login" : "/student-login";
+    const loginPaths = {
+      staff: "/staff-login",
+      parent: "/parent-login",
+      student: "/student-login",
+    };
+    const loginPath = loginPaths[role] || "/";
     return <Navigate to={loginPath} replace />;
   }
 

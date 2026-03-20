@@ -1,0 +1,50 @@
+Smart College Assistant - Setup Requirements
+===========================================
+
+1) System prerequisites (install these first)
+- Node.js (LTS, v20+ recommended): Runs both frontend and backend JavaScript code.
+- npm (comes with Node.js): Installs project dependencies.
+- MongoDB Community Server (v7+ recommended): Required by backend for local database storage.
+- Git (optional but recommended): For cloning/updating the project.
+
+2) Install project dependencies
+- Backend:
+  cd backend
+  npm install
+
+- Frontend:
+  cd frontend
+  npm install
+
+3) Run the project
+- Start backend (from backend folder):
+  node server.js
+
+- Start frontend (from frontend folder):
+  npm run dev
+
+- Open app:
+  Frontend: http://localhost:5173
+  Backend: http://localhost:5000
+
+4) Backend dependencies (from backend/package.json)
+- express: Web server framework used to create API routes.
+- cors: Allows frontend and backend to communicate across different ports.
+- mongoose: MongoDB object modeling tool for schemas and database access.
+- bcryptjs: Hashes passwords securely before storing.
+- jsonwebtoken: Creates/verifies JWT tokens for authentication.
+
+5) Frontend dependencies (from frontend/package.json)
+- react: Core UI library.
+- react-dom: Renders React components in the browser.
+- react-router-dom: Client-side routing/navigation between pages.
+- axios: HTTP client used to call backend APIs.
+
+6) Frontend development dependencies
+- vite: Development server and build tool.
+- @vitejs/plugin-react: React support for Vite (Fast Refresh, JSX transform).
+- eslint: Linting tool for code quality checks.
+- @eslint/js, globals: Base ESLint config helpers.
+- eslint-plugin-react-hooks: Enforces React Hooks rules.
+- eslint-plugin-react-refresh: Lint rules for Fast Refresh-safe exports.
+- @types/react, @types/react-dom: Type definitions used by tooling.

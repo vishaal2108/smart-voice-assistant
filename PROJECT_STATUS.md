@@ -11,7 +11,17 @@ Last updated: March 1, 2026
 1. Frontend connected to backend.
 2. Voice recognition and voice response flow working.
 3. Student and staff login pages exist.
-4. JWT-based RBAC implemented.
+4. JWT-based RBAC implemented and protected routes in `ProtectedRoute.jsx`.
+5. Backend has complete CR(UD) for staff-managed data in `contentRoutes.js`:
+   - `POST/GET/PUT/DELETE /api/fees`
+   - `POST/GET/PUT/DELETE /api/placements`
+   - `POST/GET/PUT/DELETE /api/notices`
+   - `POST/GET/PUT/DELETE /api/circulars`
+6. Staff-only authorization enforced by `authenticateToken` + `authorizeRoles("staff")` middleware.
+7. Student dashboard includes voice assistant card and staff assignment display from `/api/staff-assignments`.
+8. Student dashboard now fully loads timetable, notices, placements, fees, circulars, and staff assignments.
+9. Logout hook implemented on `StudentDashboard`.
+10. Backward compatible plain-text password login path with auto-hash-upgrade on auth.
 
 ## RBAC Implementation Summary
 ### Backend
@@ -21,17 +31,18 @@ Last updated: March 1, 2026
   - `backend/routes/authRoutes.js`
   - Student login: `/api/login/student`
   - Staff login: `/api/login/staff`
+  - Parent login: `/api/login/parent`
   - Register route: `/api/register` (supports `role`)
 - Protected staff-only write routes:
-  - `POST /api/timetable`
+  - `POST /api/timetable` (probably staff route in `timetableRoutes.js`)
   - `POST /api/fees`
   - `POST /api/placements`
   - `POST /api/notices`
   - `POST /api/circulars`
 - Added content routes file:
   - `backend/routes/contentRoutes.js`
-- Added Circular model:
-  - `backend/models/Circular.js`
+- Added models:
+  - `backend/models/Circular.js`, `Fee.js`, `Placement.js`, `Notice.js` etc.
 - Server route wiring updated:
   - `backend/server.js`
 - Added dependencies:
@@ -47,6 +58,8 @@ Last updated: March 1, 2026
 - Staff panel sends bearer token for protected POST requests:
   - `frontend/src/pages/StaffPanel.jsx`
 - Staff panel includes Circular entry form.
+- Student dashboard reads staff assignment data and voice instructions:
+  - `frontend/src/pages/StudentDashboard.jsx`
 
 ## Important Notes
 1. Voice feature endpoints and behavior were kept intact.
@@ -56,15 +69,21 @@ Last updated: March 1, 2026
    - Set `JWT_SECRET` in environment for production.
 
 ## Pending / Next Modules
-1. Build Student Dashboard UI (read-only cards/tables for timetable, notices, placements, fees, circulars).
-2. Add edit/delete APIs and UI for staff-managed records.
-3. Add input validation and cleaner error responses.
-4. Add student logout + better session UX.
-5. Add backend/API tests for role protection.
+1. Student Dashboard read-only data expansion completed: timetable, fees, placements, notices, circulars, staff assignments.
+2. StaffPanel UI for full CRUD on staff data collections (currently Circular form only).
+3. Route-level and request-body validation (backend and frontend form checks).
+4. Full logout/session UX for student/staff/parent flows (Student logout exists; Staff/Parent logout and expiry refresh improvement needed).
+5. Add automated backend/API tests for role protection, route authorization, and data operations.
+6. Add parent dashboard and parent/team access as required by product scope.
 
 ## Recommended Next Step (Tomorrow)
-- Start with Student Dashboard UI:
-  - Add one page that fetches and displays `/api/timetable`, `/api/notices`, `/api/placements`, `/api/fees`, `/api/circulars`.
+- Expand StudentDashboard UI and connect to:
+  - `GET /api/timetable`
+  - `GET /api/notices`
+  - `GET /api/placements`
+  - `GET /api/fees`
+  - `GET /api/circulars`
+- Add StaffPanel list/edit/delete cards for each resource.
 
 ## Quick Run Checklist
 ### Backend

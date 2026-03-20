@@ -14,7 +14,7 @@
 			"com.tldraw.pointer": 1,
 			"com.tldraw.shape": 4,
 			"com.tldraw.asset.bookmark": 2,
-			"com.tldraw.asset.image": 5,
+			"com.tldraw.asset.image": 6,
 			"com.tldraw.asset.video": 5,
 			"com.tldraw.shape.group": 0,
 			"com.tldraw.shape.text": 4,
@@ -437,7 +437,7 @@
 			"typeName": "shape"
 		},
 		{
-			"x": 394.64379245526993,
+			"x": 405.7455387721882,
 			"y": 332.31728896957867,
 			"z": 0.4503795940986658,
 			"meta": {},
@@ -612,9 +612,7 @@
 		{
 			"editingShapeId": null,
 			"croppingShapeId": null,
-			"selectedShapeIds": [
-				"shape:NSDNYpio4qcrFSD61LpP7"
-			],
+			"selectedShapeIds": [],
 			"hoveredShapeId": null,
 			"erasingShapeIds": [],
 			"hintingShapeIds": [],
@@ -1135,7 +1133,7 @@
 			"screenBounds": {
 				"x": 0,
 				"y": 0,
-				"w": 932,
+				"w": 942,
 				"h": 638
 			},
 			"insets": [

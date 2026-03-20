@@ -77,6 +77,90 @@
   background-color: #115e59;
 }
 
+.secondaryButton {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.emptyText {
+  margin: 0;
+  color: #64748b;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.listItem {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.meta {
+  font-size: 13px;
+  color: #475569;
+  margin-top: 4px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editToolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.recordContent {
+  flex: 1;
+}
+
+.smallButton {
+  border: none;
+  border-radius: 6px;
+  background: #0369a1;
+  color: #fff;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.smallDeleteButton {
+  border: none;
+  border-radius: 6px;
+  background: #dc2626;
+  color: #fff;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.secondaryButtonInline {
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #0f172a;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
 @media (max-width: 768px) {
   .grid {
     grid-template-columns: 1fr;

@@ -30,6 +30,47 @@ const createResourceRoutes = (path, Model) => {
       return res.status(500).json({ message: "Server error" });
     }
   });
+
+  router.put(
+    `${path}/:id`,
+    authenticateToken,
+    authorizeRoles("staff"),
+    async (req, res) => {
+      try {
+        const updated = await Model.findByIdAndUpdate(req.params.id, req.body, {
+          new: true,
+          runValidators: true,
+        });
+
+        if (!updated) {
+          return res.status(404).json({ message: `${Model.modelName} not found` });
+        }
+
+        return res.json({ message: `${Model.modelName} updated`, data: updated });
+      } catch (error) {
+        return res.status(500).json({ message: "Server error" });
+      }
+    }
+  );
+
+  router.delete(
+    `${path}/:id`,
+    authenticateToken,
+    authorizeRoles("staff"),
+    async (req, res) => {
+      try {
+        const deleted = await Model.findByIdAndDelete(req.params.id);
+
+        if (!deleted) {
+          return res.status(404).json({ message: `${Model.modelName} not found` });
+        }
+
+        return res.json({ message: `${Model.modelName} deleted` });
+      } catch (error) {
+        return res.status(500).json({ message: "Server error" });
+      }
+    }
+  );
 };
 
 createResourceRoutes("/fees", Fee);
