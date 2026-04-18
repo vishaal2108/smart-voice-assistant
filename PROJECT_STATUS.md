@@ -1,103 +1,104 @@
 # Project Status - Smart College Voice Assistant
 
-Last updated: March 1, 2026
+Last updated: April 18, 2026
 
-## Tech Stack
+## Project Snapshot
+- Project title: `Smart College Assistant: A Voice-Driven System`
+- Current state: core full-stack prototype is functional
 - Frontend: React + Vite + Web Speech API
 - Backend: Node.js + Express
-- Database: MongoDB (Mongoose)
+- Database: MongoDB with Mongoose
+- Access roles implemented: `student`, `staff`, `parent`
 
-## Completed So Far
-1. Frontend connected to backend.
-2. Voice recognition and voice response flow working.
-3. Student and staff login pages exist.
-4. JWT-based RBAC implemented and protected routes in `ProtectedRoute.jsx`.
-5. Backend has complete CR(UD) for staff-managed data in `contentRoutes.js`:
-   - `POST/GET/PUT/DELETE /api/fees`
-   - `POST/GET/PUT/DELETE /api/placements`
-   - `POST/GET/PUT/DELETE /api/notices`
-   - `POST/GET/PUT/DELETE /api/circulars`
-6. Staff-only authorization enforced by `authenticateToken` + `authorizeRoles("staff")` middleware.
-7. Student dashboard includes voice assistant card and staff assignment display from `/api/staff-assignments`.
-8. Student dashboard now fully loads timetable, notices, placements, fees, circulars, and staff assignments.
-9. Logout hook implemented on `StudentDashboard`.
-10. Backward compatible plain-text password login path with auto-hash-upgrade on auth.
+## Completed Modules
+1. Frontend and backend integration is working.
+2. Voice input and spoken/text response flow is implemented.
+3. JWT-based authentication and role-based access control are in place.
+4. Separate login flows exist for student, staff, and parent users.
+5. Protected frontend routes are enforced through `frontend/src/components/ProtectedRoute.jsx`.
+6. Staff dashboard supports create, edit, delete, and list operations for:
+   - timetable
+   - fees
+   - placements
+   - notices
+   - circulars
+   - staff assignments
+   - student records
+   - student performance
+7. Student dashboard loads and displays:
+   - voice assistant
+   - timetable
+   - notices
+   - placements
+   - fees
+   - circulars
+   - staff assignments
+8. Parent dashboard displays linked student details and student performance.
+9. Backend supports parent-specific read APIs for linked students and performance records.
+10. Plain-text legacy passwords are handled with backward-compatible login and auto-upgrade to hashed passwords.
+11. Automated backend API tests are present for auth, RBAC, CRUD protection, and parent access flows.
+12. Project documentation and report assets are present, including `paper.tex`, `report.tex`, and architecture images in `arch/`.
 
-## RBAC Implementation Summary
-### Backend
-- Added JWT + role middleware:
-  - `backend/middleware/authMiddleware.js`
-- Updated auth routes:
-  - `backend/routes/authRoutes.js`
-  - Student login: `/api/login/student`
-  - Staff login: `/api/login/staff`
-  - Parent login: `/api/login/parent`
-  - Register route: `/api/register` (supports `role`)
-- Protected staff-only write routes:
-  - `POST /api/timetable` (probably staff route in `timetableRoutes.js`)
-  - `POST /api/fees`
-  - `POST /api/placements`
-  - `POST /api/notices`
-  - `POST /api/circulars`
-- Added content routes file:
-  - `backend/routes/contentRoutes.js`
-- Added models:
-  - `backend/models/Circular.js`, `Fee.js`, `Placement.js`, `Notice.js` etc.
-- Server route wiring updated:
-  - `backend/server.js`
-- Added dependencies:
-  - `jsonwebtoken`
-  - `bcryptjs`
+## Backend Status
+- Main app entry for testable route wiring exists in `backend/app.js`.
+- Server wiring is active through `backend/server.js`.
+- Auth routes implemented in `backend/routes/authRoutes.js`.
+- Voice command handling exists in `backend/routes/command.js`.
+- Staff-managed content APIs exist in `backend/routes/contentRoutes.js`.
+- Timetable APIs exist in `backend/routes/timetableRoutes.js`.
+- Academic and parent-linked APIs exist in `backend/routes/academicsRoutes.js`.
+- Middleware for token verification and role checks exists in `backend/middleware/authMiddleware.js`.
 
-### Frontend
-- Login pages now store JWT token + role in `localStorage`:
-  - `frontend/src/pages/StudentLogin.jsx`
-  - `frontend/src/pages/StaffLogin.jsx`
-- Route guard checks token expiry + role:
-  - `frontend/src/components/ProtectedRoute.jsx`
-- Staff panel sends bearer token for protected POST requests:
-  - `frontend/src/pages/StaffPanel.jsx`
-- Staff panel includes Circular entry form.
-- Student dashboard reads staff assignment data and voice instructions:
-  - `frontend/src/pages/StudentDashboard.jsx`
+## Frontend Status
+- Student login page: `frontend/src/pages/StudentLogin.jsx`
+- Staff login page: `frontend/src/pages/StaffLogin.jsx`
+- Parent login page: `frontend/src/pages/ParentLogin.jsx`
+- Student dashboard: `frontend/src/pages/StudentDashboard.jsx`
+- Staff dashboard: `frontend/src/pages/StaffPanel.jsx`
+- Parent dashboard: `frontend/src/pages/ParentDashboard.jsx`
+- Protected route guard: `frontend/src/components/ProtectedRoute.jsx`
 
-## Important Notes
-1. Voice feature endpoints and behavior were kept intact.
-2. Existing plain-text passwords are handled with backward compatibility in login:
-   - If login succeeds with plain-text, password is auto-hashed and saved.
-3. JWT secret currently has fallback value in code:
-   - Set `JWT_SECRET` in environment for production.
+## Tested Coverage
+- Backend test file: `backend/tests/api.test.js`
+- Covered areas include:
+  - login and authorization flow
+  - staff-only write protection
+  - CRUD for notices, fees, placements, and circulars
+  - timetable validation
+  - student and staff assignment management
+  - parent access to linked records
+  - rejection of unauthorized operations
 
-## Pending / Next Modules
-1. Student Dashboard read-only data expansion completed: timetable, fees, placements, notices, circulars, staff assignments.
-2. StaffPanel UI for full CRUD on staff data collections (currently Circular form only).
-3. Route-level and request-body validation (backend and frontend form checks).
-4. Full logout/session UX for student/staff/parent flows (Student logout exists; Staff/Parent logout and expiry refresh improvement needed).
-5. Add automated backend/API tests for role protection, route authorization, and data operations.
-6. Add parent dashboard and parent/team access as required by product scope.
+## Current Highlights
+- Multi-role access model is implemented and usable.
+- Voice-driven student interaction is integrated with academic information endpoints.
+- Parent portal is available for linked student monitoring.
+- Staff panel has grown into the main administrative control surface.
+- Documentation for report writing is actively being maintained in the repository.
 
-## Recommended Next Step (Tomorrow)
-- Expand StudentDashboard UI and connect to:
-  - `GET /api/timetable`
-  - `GET /api/notices`
-  - `GET /api/placements`
-  - `GET /api/fees`
-  - `GET /api/circulars`
-- Add StaffPanel list/edit/delete cards for each resource.
+## Pending / Next Work
+1. Finalize project diagrams and include them consistently in the paper/report.
+2. Polish UI copy, layout, and responsiveness across dashboards.
+3. Add stronger input validation and user-friendly error messaging on all forms.
+4. Add environment setup notes and deployment instructions for reproducible execution.
+5. Expand tests to cover frontend flows and more edge cases.
+6. Review naming consistency between "voice assistant" and "voice-driven system" across code and documentation.
+
+## Recommended Immediate Next Step
+- Complete architecture, use case, sequence, and class diagrams for the final paper submission.
 
 ## Quick Run Checklist
 ### Backend
 1. `cd backend`
-2. Ensure env has Mongo URI and `JWT_SECRET`
-3. `npm install`
-4. `node server.js`
+2. Install dependencies with `npm install`
+3. Set MongoDB URI and `JWT_SECRET`
+4. Start server with `node server.js`
 
 ### Frontend
 1. `cd frontend`
-2. `npm install`
-3. `npm run dev`
+2. Install dependencies with `npm install`
+3. Start client with `npm run dev`
 
-## Current Branch Working Tree
-- Contains RBAC and staff-content route changes; review with:
-- `git status`
-- `git diff`
+## Git Working Tree Note
+- The repository currently contains multiple in-progress local code and document changes beyond this status file update.
+- This status document reflects the codebase state visible in the workspace on April 18, 2026.
