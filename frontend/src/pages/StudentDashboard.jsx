@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import VoiceInput from "../components/VoiceInput";
 import styles from "./StudentDashboard.module.css";
-
-const API_BASE = "http://localhost:5000/api";
+import { normalizeStaffAssignments } from "../utils/staffAssignments";
 
 function StudentDashboard() {
   const navigate = useNavigate();
+  const [studentProfile, setStudentProfile] = useState(null);
+  const [studentPerformances, setStudentPerformances] = useState([]);
   const [timetable, setTimetable] = useState([]);
   const [notices, setNotices] = useState([]);
   const [placements, setPlacements] = useState([]);
@@ -14,92 +15,143 @@ function StudentDashboard() {
   const [circulars, setCirculars] = useState([]);
   const [staffAssignments, setStaffAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const authToken = localStorage.getItem("token");
-  const userRole = localStorage.getItem("role");
+  const handleLogout = () => {
+    localStorage.removeItem("token_student");
+    localStorage.removeItem("role_student");
+    navigate("/student-login");
+  };
 
-  useEffect(() => {
-    if (!authToken || userRole !== "student") {
-      navigate("/student-login");
-      return;
+  const extractResponseData = async (res) => {
+    const raw = await res.text();
+
+    if (!raw) {
+      return null;
     }
 
-    const fetchData = async () => {
-      setLoading(true);
-      setError("");
+    try {
+      return JSON.parse(raw);
+    } catch (error) {
+      return raw;
+    }
+  };
 
+  useEffect(() => {
+    const loadStudentData = async () => {
       try {
-        const responses = await Promise.all([
-          fetch(`${API_BASE}/timetable`, { headers: { Authorization: `Bearer ${authToken}` } }),
-          fetch(`${API_BASE}/notices`, { headers: { Authorization: `Bearer ${authToken}` } }),
-          fetch(`${API_BASE}/placements`, { headers: { Authorization: `Bearer ${authToken}` } }),
-          fetch(`${API_BASE}/fees`, { headers: { Authorization: `Bearer ${authToken}` } }),
-          fetch(`${API_BASE}/circulars`, { headers: { Authorization: `Bearer ${authToken}` } }),
-          fetch(`${API_BASE}/staff-assignments`, { headers: { Authorization: `Bearer ${authToken}` } }),
+        setErrorMessage("");
+        const [
+          profileRes,
+          performanceRes,
+          timetableRes,
+          noticeRes,
+          placementRes,
+          feeRes,
+          circularRes,
+          staffRes,
+        ] = await Promise.all([
+          fetch("http://localhost:5000/api/student/profile", {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token_student")}`,
+            },
+          }),
+          fetch("http://localhost:5000/api/student/performance", {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token_student")}`,
+            },
+          }),
+          fetch("http://localhost:5000/api/timetable"),
+          fetch("http://localhost:5000/api/notices"),
+          fetch("http://localhost:5000/api/placements"),
+          fetch("http://localhost:5000/api/fees"),
+          fetch("http://localhost:5000/api/circulars"),
+          fetch("http://localhost:5000/api/staff-assignments"),
         ]);
 
-        const bad = responses.find((res) => !res.ok);
-        if (bad) {
-          if (bad.status === 401 || bad.status === 403) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("role");
-            navigate("/student-login");
-            return;
-          }
-          throw new Error(`Unable to load data (${bad.status})`);
+        const [
+          profileData,
+          performanceData,
+          timetableData,
+          noticeData,
+          placementData,
+          feeData,
+          circularData,
+          staffData,
+        ] = await Promise.all([
+          extractResponseData(profileRes),
+          extractResponseData(performanceRes),
+          extractResponseData(timetableRes),
+          extractResponseData(noticeRes),
+          extractResponseData(placementRes),
+          extractResponseData(feeRes),
+          extractResponseData(circularRes),
+          extractResponseData(staffRes),
+        ]);
+
+        if (
+          profileRes.status === 401 ||
+          profileRes.status === 403 ||
+          performanceRes.status === 401 ||
+          performanceRes.status === 403
+        ) {
+          handleLogout();
+          return;
         }
 
-        const [timetableData, noticesData, placementsData, feesData, circularsData, staffAssignmentsData] = await Promise.all(
-          responses.map((res) => res.json())
-        );
+        if (profileRes.ok && profileData && !Array.isArray(profileData)) {
+          setStudentProfile(profileData);
+        }
 
-        setTimetable(Array.isArray(timetableData) ? timetableData : []);
-        setNotices(Array.isArray(noticesData) ? noticesData : []);
-        setPlacements(Array.isArray(placementsData) ? placementsData : []);
-        setFees(Array.isArray(feesData) ? feesData : []);
-        setCirculars(Array.isArray(circularsData) ? circularsData : []);
-        setStaffAssignments(Array.isArray(staffAssignmentsData) ? staffAssignmentsData : []);
-      } catch (err) {
-        setError(err.message || "Failed to load dashboard data");
+        if (performanceRes.ok && Array.isArray(performanceData)) {
+          setStudentPerformances(performanceData);
+        }
+
+        if (timetableRes.ok && Array.isArray(timetableData)) {
+          setTimetable(timetableData);
+        }
+
+        if (noticeRes.ok && Array.isArray(noticeData)) {
+          setNotices(noticeData);
+        }
+
+        if (placementRes.ok && Array.isArray(placementData)) {
+          setPlacements(placementData);
+        }
+
+        if (feeRes.ok && Array.isArray(feeData)) {
+          setFees(feeData);
+        }
+
+        if (circularRes.ok && Array.isArray(circularData)) {
+          setCirculars(circularData);
+        }
+
+        if (staffRes.ok && Array.isArray(staffData)) {
+          setStaffAssignments(normalizeStaffAssignments(staffData));
+        }
+
+        if (
+          (!profileRes.ok && profileRes.status !== 404) ||
+          !performanceRes.ok ||
+          !timetableRes.ok ||
+          !noticeRes.ok ||
+          !placementRes.ok ||
+          !feeRes.ok ||
+          !circularRes.ok ||
+          !staffRes.ok
+        ) {
+          setErrorMessage("Some sections could not be loaded. Please refresh or try again later.");
+        }
+      } catch (error) {
+        setErrorMessage("Failed to load student dashboard data.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [authToken, userRole, navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    navigate("/student-login");
-  };
-
-  const renderList = (items, title, renderItem) => (
-    <div className={styles.card}>
-      <h3>{title}</h3>
-      {items.length === 0 ? (
-        <p className={styles.voiceHint}>No {title.toLowerCase()} found.</p>
-      ) : (
-        <ul className={styles.list}>
-          {items.map((item) => (
-            <li key={item._id || item.id}>{renderItem(item)}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-
-  if (loading) {
-    return (
-      <div className={styles.wrapper}>
-        <div className={styles.container}>
-          <p>Loading student dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+    loadStudentData();
+  }, []);
 
   return (
     <div className={styles.wrapper}>
@@ -111,14 +163,153 @@ function StudentDashboard() {
           </button>
         </div>
 
-        {error && <div className={styles.error}>{error}</div>}
-
         <div className={styles.voiceCard}>
           <h3>Voice Assistant</h3>
           <p className={styles.voiceHint}>
-            Ask about timetable, fees, placements, notices, circulars, or which staff handles a subject.
+            Ask about timetable, fees, placements, notices, or circulars. Results will appear below after your question.
           </p>
           <VoiceInput />
+        </div>
+
+        {errorMessage && <div className={styles.error}>{errorMessage}</div>}
+
+        <div className={styles.dashboardGrid}>
+          <div className={styles.card}>
+            <h3>My Profile</h3>
+            {loading && <p>Loading profile...</p>}
+            {!loading && !studentProfile && <p>Student details are not linked yet.</p>}
+            {!loading && studentProfile && (
+              <ul className={styles.list}>
+                <li><strong>Name:</strong> {studentProfile.name}</li>
+                <li><strong>Email:</strong> {studentProfile.email}</li>
+                {studentProfile.department && <li><strong>Department:</strong> {studentProfile.department}</li>}
+                {studentProfile.year && <li><strong>Year:</strong> {studentProfile.year}</li>}
+                {studentProfile.phone && <li><strong>Phone:</strong> {studentProfile.phone}</li>}
+                {studentProfile.address && <li><strong>Address:</strong> {studentProfile.address}</li>}
+              </ul>
+            )}
+          </div>
+
+          <div className={styles.card}>
+            <h3>My Performance</h3>
+            {loading && <p>Loading performance...</p>}
+            {!loading && studentPerformances.length === 0 && <p>No performance records available.</p>}
+            {!loading && studentPerformances.length > 0 && (
+              <ul className={styles.list}>
+                {studentPerformances.map((item) => (
+                  <li key={item._id || `${item.studentEmail}-${item.month}`}>
+                    <strong>{item.month}</strong>
+                    {` | Attendance: ${item.attendancePercentage}% | Overall: ${item.overallPercentage}%`}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className={styles.card}>
+            <h3>Timetable</h3>
+            {loading && <p>Loading timetable...</p>}
+            {!loading && timetable.length === 0 && <p>No timetable entries available.</p>}
+            {!loading && timetable.length > 0 && (
+              <ul className={styles.list}>
+                {timetable.map((item) => (
+                  <li key={item._id || `${item.day}-${item.time}-${item.subject}`}>
+                    {item.day ? `${item.day}: ` : ""}
+                    {item.time ? `${item.time} - ` : ""}
+                    {item.subject}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className={styles.card}>
+            <h3>Notices</h3>
+            {loading && <p>Loading notices...</p>}
+            {!loading && notices.length === 0 && <p>No notices available.</p>}
+            {!loading && notices.length > 0 && (
+              <ul className={styles.list}>
+                {notices.map((item) => (
+                  <li key={item._id || item.title}>
+                    <strong>{item.title}</strong>
+                    {item.date ? ` | ${item.date}` : ""}
+                    {item.content ? ` - ${item.content}` : ""}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className={styles.card}>
+            <h3>Placements</h3>
+            {loading && <p>Loading placements...</p>}
+            {!loading && placements.length === 0 && <p>No placement updates.</p>}
+            {!loading && placements.length > 0 && (
+              <ul className={styles.list}>
+                {placements.map((item) => (
+                  <li key={item._id || item.companyName}>
+                    <strong>{item.companyName}</strong>
+                    {item.package ? ` | ${item.package}` : ""}
+                    {item.date ? ` | ${item.date}` : ""}
+                    {item.eligibility ? ` | ${item.eligibility}` : ""}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className={styles.card}>
+            <h3>Fees</h3>
+            {loading && <p>Loading fees...</p>}
+            {!loading && fees.length === 0 && <p>No fee details available.</p>}
+            {!loading && fees.length > 0 && (
+              <ul className={styles.list}>
+                {fees.map((item) => (
+                  <li key={item._id || `${item.department}-${item.year}`}>
+                    {item.department ? `${item.department} ` : ""}
+                    {item.year ? `(${item.year}) ` : ""}
+                    {item.totalFee ? `- Rs. ${item.totalFee}` : ""}
+                    {item.dueDate ? ` | Due: ${item.dueDate}` : ""}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className={styles.card}>
+            <h3>Circulars</h3>
+            {loading && <p>Loading circulars...</p>}
+            {!loading && circulars.length === 0 && <p>No circulars available.</p>}
+            {!loading && circulars.length > 0 && (
+              <ul className={styles.list}>
+                {circulars.map((item) => (
+                  <li key={item._id || item.title}>
+                    <strong>{item.title}</strong>
+                    {item.date ? ` | ${item.date}` : ""}
+                    {item.content ? ` - ${item.content}` : ""}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className={styles.card}>
+            <h3>Staff Assignments</h3>
+            {loading && <p>Loading staff assignments...</p>}
+            {!loading && staffAssignments.length === 0 && <p>No staff assignments yet.</p>}
+            {!loading && staffAssignments.length > 0 && (
+              <ul className={styles.list}>
+                {staffAssignments.map((item) => (
+                  <li key={item._id || `${item.staffName}-${item.subject}`}>
+                    {item.subject ? `${item.subject} - ` : ""}
+                    {item.staffName}
+                    {item.department ? ` | ${item.department}` : ""}
+                    {item.year ? ` | ${item.year}` : ""}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
     </div>

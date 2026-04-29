@@ -18,9 +18,30 @@
   margin-bottom: 20px;
 }
 
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .title {
   color: #fff;
   margin: 0;
+}
+
+.secondaryButton {
+  border: 1px solid #cbd5f5;
+  background: #fff;
+  color: #0b3d91;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.secondaryButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .logoutButton {

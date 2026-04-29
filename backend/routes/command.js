@@ -4,7 +4,9 @@ const Timetable = require("../models/Timetable");
 const Fee = require("../models/Fee");
 const Placement = require("../models/Placement");
 const Notice = require("../models/Notice");
+const Circular = require("../models/Circular");
 const StaffAssignment = require("../models/StaffAssignment");
+const StudentPerformance = require("../models/StudentPerformance");
 
 const SUBJECT_KEYWORDS = [
   "ai/ml",
@@ -144,6 +146,33 @@ router.post("/", async (req, res) => {
       response = "No notices available.";
     } else {
       response = `Latest notice: ${notice.title}. ${notice.content}`;
+    }
+
+  // Circular query
+  } else if (cmd.includes("circular") || cmd.includes("circulars")) {
+
+    const circular = await Circular.findOne().sort({ _id: -1 });
+
+    if (!circular) {
+      response = "No circulars available.";
+    } else {
+      response = `Latest circular: ${circular.title}. ${circular.content}`;
+    }
+
+  // Attendance / performance query
+  } else if (
+    cmd.includes("attendance") ||
+    cmd.includes("performance") ||
+    cmd.includes("marks") ||
+    cmd.includes("result")
+  ) {
+
+    const record = await StudentPerformance.findOne().sort({ month: -1, _id: -1 });
+
+    if (!record) {
+      response = "No performance records are available yet.";
+    } else {
+      response = `Latest performance record: ${record.studentName} (${record.month}). Attendance ${record.attendancePercentage}%. Overall ${record.overallPercentage}%.`;
     }
 
   // Current time

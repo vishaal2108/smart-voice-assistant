@@ -15,13 +15,25 @@ const isTokenExpired = (token) => {
   }
 };
 
+const getTokenRole = (token) => {
+  try {
+    const payloadBase64 = token.split(".")[1];
+    const payload = JSON.parse(atob(payloadBase64));
+    return payload.role || "";
+  } catch (error) {
+    return "";
+  }
+};
+
 function ProtectedRoute({ children, role }) {
-  const token = localStorage.getItem("token");
-  const userRole = localStorage.getItem("role");
+  const tokenKey = `token_${role}`;
+  const roleKey = `role_${role}`;
+  const token = localStorage.getItem(tokenKey);
+  const userRole = localStorage.getItem(roleKey) || getTokenRole(token || "");
 
   if (!token || !userRole || isTokenExpired(token) || userRole !== role) {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
+    localStorage.removeItem(tokenKey);
+    localStorage.removeItem(roleKey);
 
     const loginPaths = {
       staff: "/staff-login",

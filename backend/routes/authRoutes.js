@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const router = express.Router();
 const User = require("../models/User");
 const { JWT_SECRET } = require("../middleware/authMiddleware");
+const { normalizeEmail, requireEmailField, isEmptyValue } = require("../utils/validators");
 
 const signToken = (user) => {
   return jwt.sign(
@@ -21,11 +22,17 @@ const loginByRole = (role) => async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+    const emailCheck = requireEmailField(email, "email");
+    if (!emailCheck.ok) {
+      return res.status(400).json({ message: emailCheck.message });
     }
 
-    const user = await User.findOne({ email, role });
+    if (isEmptyValue(password)) {
+      return res.status(400).json({ message: "Password is required" });
+    }
+
+    const normalizedEmail = normalizeEmail(email);
+    const user = await User.findOne({ email: normalizedEmail, role });
 
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
@@ -69,22 +76,28 @@ router.post("/register", async (req, res) => {
   try {
     const { email, password, role = "student" } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+    const emailCheck = requireEmailField(email, "email");
+    if (!emailCheck.ok) {
+      return res.status(400).json({ message: emailCheck.message });
+    }
+
+    if (isEmptyValue(password)) {
+      return res.status(400).json({ message: "Password is required" });
     }
 
     if (!["student", "staff", "parent"].includes(role)) {
       return res.status(400).json({ message: "Role must be student, staff or parent" });
     }
 
-    const existingUser = await User.findOne({ email });
+    const normalizedEmail = normalizeEmail(email);
+    const existingUser = await User.findOne({ email: normalizedEmail });
 
     if (existingUser) {
       return res.status(409).json({ message: "User already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ email, password: hashedPassword, role });
+    const user = await User.create({ email: normalizedEmail, password: hashedPassword, role });
 
     return res.status(201).json({
       message: "User registered successfully",

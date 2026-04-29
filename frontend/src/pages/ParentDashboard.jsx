@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./ParentDashboard.module.css";
+import { normalizeStaffAssignments } from "../utils/staffAssignments";
 
 const HOD_DESK = {
   intro: "Greetings from the Department of Information Technology.",
@@ -27,19 +28,6 @@ const HOD_DESK = {
     "At the Department of Information Technology, we foster a culture of continuous learning, ethical responsibility, and technological excellence. We take pride in shaping graduates who are not only technically proficient but also capable of adapting and leading in a global IT landscape.",
 };
 
-const STAFF_ORDER = [
-  "padmavathi",
-  "manikandan",
-  "aruna",
-  "mahalakshmi",
-  "valampuranayaki",
-  "ezhilarasi",
-  "jeevitha",
-  "priyadarshini",
-  "gayathri",
-  "ganesh",
-];
-
 function ParentDashboard() {
   const navigate = useNavigate();
   const [performances, setPerformances] = useState([]);
@@ -50,27 +38,12 @@ function ParentDashboard() {
   const [brokenStaffImages, setBrokenStaffImages] = useState({});
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [showOtherStaffs, setShowOtherStaffs] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const orderedStaffCards = useMemo(() => {
-    const sortedAssignments = [...staffAssignments].sort((a, b) => {
-      const aName = String(a.staffName || "").toLowerCase();
-      const bName = String(b.staffName || "").toLowerCase();
-
-      const aIndex = STAFF_ORDER.findIndex((key) => aName.includes(key));
-      const bIndex = STAFF_ORDER.findIndex((key) => bName.includes(key));
-
-      const safeAIndex = aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex;
-      const safeBIndex = bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex;
-
-      if (safeAIndex !== safeBIndex) {
-        return safeAIndex - safeBIndex;
-      }
-
-      return aName.localeCompare(bName);
-    });
-
-    return sortedAssignments;
-  }, [staffAssignments]);
+  const orderedStaffCards = useMemo(
+    () => normalizeStaffAssignments(staffAssignments),
+    [staffAssignments]
+  );
 
   const activeSubjectStaff = useMemo(
     () => {
@@ -114,81 +87,110 @@ function ParentDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
+    localStorage.removeItem("token_parent");
+    localStorage.removeItem("role_parent");
     navigate("/parent-login");
   };
 
+  const loadData = useCallback(async (showLoader = true) => {
+    try {
+      if (showLoader) {
+        setLoading(true);
+      } else {
+        setIsRefreshing(true);
+      }
+
+      setErrorMessage("");
+      const token = localStorage.getItem("token_parent");
+      const [performanceRes, staffRes, studentsRes] = await Promise.all([
+        fetch("http://localhost:5000/api/parent/performance", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+        fetch("http://localhost:5000/api/staff-assignments"),
+        fetch("http://localhost:5000/api/parent/students", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+      ]);
+
+      if (
+        performanceRes.status === 401 ||
+        performanceRes.status === 403 ||
+        studentsRes.status === 401 ||
+        studentsRes.status === 403
+      ) {
+        handleLogout();
+        return;
+      }
+
+      const [performanceData, staffData, studentsData] = await Promise.all([
+        extractResponseData(performanceRes),
+        extractResponseData(staffRes),
+        extractResponseData(studentsRes),
+      ]);
+
+      if (performanceRes.ok && Array.isArray(performanceData)) {
+        setPerformances(performanceData);
+      }
+
+      if (staffRes.ok && Array.isArray(staffData)) {
+        setStaffAssignments(staffData);
+      }
+
+      if (studentsRes.ok && Array.isArray(studentsData)) {
+        setStudents(studentsData);
+      } else if (!studentsRes.ok) {
+        const backendMessage =
+          typeof studentsData === "object" && studentsData?.message
+            ? studentsData.message
+            : `Failed to load linked students (status ${studentsRes.status})`;
+        setErrorMessage(backendMessage);
+      }
+    } catch (error) {
+      setErrorMessage("Failed to load parent dashboard data");
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setErrorMessage("");
-        const token = localStorage.getItem("token");
-        const [performanceRes, staffRes, studentsRes] = await Promise.all([
-          fetch("http://localhost:5000/api/parent/performance", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
-          fetch("http://localhost:5000/api/staff-assignments"),
-          fetch("http://localhost:5000/api/parent/students", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
-        ]);
+    loadData(true);
 
-        if (
-          performanceRes.status === 401 ||
-          performanceRes.status === 403 ||
-          studentsRes.status === 401 ||
-          studentsRes.status === 403
-        ) {
-          handleLogout();
-          return;
-        }
-
-        const [performanceData, staffData, studentsData] = await Promise.all([
-          extractResponseData(performanceRes),
-          extractResponseData(staffRes),
-          extractResponseData(studentsRes),
-        ]);
-
-        if (performanceRes.ok && Array.isArray(performanceData)) {
-          setPerformances(performanceData);
-        }
-
-        if (staffRes.ok && Array.isArray(staffData)) {
-          setStaffAssignments(staffData);
-        }
-
-        if (studentsRes.ok && Array.isArray(studentsData)) {
-          setStudents(studentsData);
-        } else if (!studentsRes.ok) {
-          const backendMessage =
-            typeof studentsData === "object" && studentsData?.message
-              ? studentsData.message
-              : `Failed to load linked students (status ${studentsRes.status})`;
-          setErrorMessage(backendMessage);
-        }
-      } catch (error) {
-        setErrorMessage("Failed to load parent dashboard data");
-      } finally {
-        setLoading(false);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        loadData(false);
       }
     };
 
-    loadData();
-  }, []);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [loadData]);
 
   return (
     <div className={styles.wrapper}>
       <div className={styles.container}>
         <div className={styles.topBar}>
           <h2 className={styles.title}>Parent Dashboard</h2>
-          <button type="button" className={styles.logoutButton} onClick={handleLogout}>
-            Logout
-          </button>
+          <div className={styles.topActions}>
+            <button
+              type="button"
+              className={styles.secondaryButton}
+              onClick={() => loadData(false)}
+              disabled={isRefreshing}
+            >
+              {isRefreshing ? "Refreshing..." : "Refresh"}
+            </button>
+            <button type="button" className={styles.logoutButton} onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
         </div>
 
         <div className={styles.card}>

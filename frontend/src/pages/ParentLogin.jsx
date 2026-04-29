@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./AuthPage.module.css";
+import { isValidEmail, isEmpty } from "../utils/validators";
 
 function ParentLogin() {
   const [email, setEmail] = useState("");
@@ -9,6 +10,16 @@ function ParentLogin() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    if (!isValidEmail(email)) {
+      alert("Enter a valid email address.");
+      return;
+    }
+
+    if (isEmpty(password)) {
+      alert("Password is required.");
+      return;
+    }
 
     const res = await fetch("http://localhost:5000/api/login/parent", {
       method: "POST",
@@ -19,8 +30,8 @@ function ParentLogin() {
     const data = await res.json();
 
     if (res.ok) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.user.role);
+      localStorage.setItem("token_parent", data.token);
+      localStorage.setItem("role_parent", data.user.role);
       navigate("/parent-dashboard");
       return;
     }

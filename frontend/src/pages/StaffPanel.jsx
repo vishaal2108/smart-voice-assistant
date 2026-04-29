@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./StaffPanel.module.css";
+import { isValidEmail, isValidMonth, isEmpty } from "../utils/validators";
 
 const EDIT_RESOURCE_CONFIG = {
   timetable: {
@@ -31,7 +32,7 @@ const EDIT_RESOURCE_CONFIG = {
   staffAssignments: {
     label: "Staff Assignments",
     path: "staff-assignments",
-    fields: ["staffName", "subject", "department", "year"],
+    fields: ["staffName", "subject", "designation", "qualification", "department", "year", "imageUrl", "profilePdfUrl"],
   },
 };
 
@@ -67,8 +68,12 @@ function StaffPanel() {
   // Staff assignment state
   const [staffName, setStaffName] = useState("");
   const [staffSubject, setStaffSubject] = useState("");
+  const [staffDesignation, setStaffDesignation] = useState("");
+  const [staffQualification, setStaffQualification] = useState("");
   const [staffDepartment, setStaffDepartment] = useState("");
   const [staffYear, setStaffYear] = useState("");
+  const [staffImageUrl, setStaffImageUrl] = useState("");
+  const [staffProfilePdfUrl, setStaffProfilePdfUrl] = useState("");
 
   // Student performance state
   const [studentName, setStudentName] = useState("");
@@ -77,6 +82,9 @@ function StaffPanel() {
   const [performanceMonth, setPerformanceMonth] = useState("");
   const [attendancePercentage, setAttendancePercentage] = useState("");
   const [subjectMarksInput, setSubjectMarksInput] = useState("");
+  const [editingPerformanceId, setEditingPerformanceId] = useState("");
+  const [performanceRecords, setPerformanceRecords] = useState([]);
+  const [isLoadingPerformanceRecords, setIsLoadingPerformanceRecords] = useState(false);
   const [students, setStudents] = useState([]);
   const [isLoadingStudents, setIsLoadingStudents] = useState(false);
   const [editingStudentId, setEditingStudentId] = useState(null);
@@ -95,13 +103,13 @@ function StaffPanel() {
 
   const authHeaders = {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${localStorage.getItem("token_staff")}`,
   };
 
   const handleAuthFailure = (res) => {
     if (res.status === 401 || res.status === 403) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
+      localStorage.removeItem("token_staff");
+      localStorage.removeItem("role_staff");
       navigate("/staff-login");
       return true;
     }
@@ -138,6 +146,16 @@ function StaffPanel() {
     setStudentRecordAddress("");
   };
 
+  const resetPerformanceForm = () => {
+    setEditingPerformanceId("");
+    setStudentName("");
+    setStudentEmail("");
+    setParentEmail("");
+    setPerformanceMonth("");
+    setAttendancePercentage("");
+    setSubjectMarksInput("");
+  };
+
   const showSuccess = (message) => {
     alert(message);
   };
@@ -168,6 +186,34 @@ function StaffPanel() {
 
   useEffect(() => {
     loadStudents();
+  }, []);
+
+  const loadPerformanceRecords = async () => {
+    setIsLoadingPerformanceRecords(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/student-performance", {
+        headers: authHeaders,
+      });
+
+      if (handleAuthFailure(res)) {
+        return;
+      }
+
+      if (!res.ok) {
+        const message = await extractErrorMessage(res, "Failed to load student performance records");
+        alert(message);
+        return;
+      }
+
+      const data = await res.json();
+      setPerformanceRecords(Array.isArray(data) ? data : []);
+    } finally {
+      setIsLoadingPerformanceRecords(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPerformanceRecords();
   }, []);
 
   const loadEditRecords = async (resourceType = editResourceType) => {
@@ -229,13 +275,19 @@ function StaffPanel() {
   const handleFees = async (e) => {
     e.preventDefault();
 
+    const numericFee = Number(totalFee);
+    if (Number.isNaN(numericFee) || numericFee <= 0) {
+      alert("Total fee must be a positive number.");
+      return;
+    }
+
     const res = await fetch("http://localhost:5000/api/fees", {
       method: "POST",
       headers: authHeaders,
       body: JSON.stringify({
         department,
         year,
-        totalFee: Number(totalFee),
+        totalFee: numericFee,
         dueDate,
       }),
     });
@@ -338,8 +390,8 @@ function StaffPanel() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
+    localStorage.removeItem("token_staff");
+    localStorage.removeItem("role_staff");
     navigate("/staff-login");
   };
 
@@ -369,6 +421,9 @@ function StaffPanel() {
     return subjects;
   };
 
+  const formatSubjectMarks = (subjects = []) =>
+    subjects.map((item) => `${item.subject}:${item.mark}`).join(", ");
+
   const handleStaffAssignment = async (e) => {
     e.preventDefault();
 
@@ -378,8 +433,12 @@ function StaffPanel() {
       body: JSON.stringify({
         staffName,
         subject: staffSubject,
+        designation: staffDesignation,
+        qualification: staffQualification,
         department: staffDepartment,
         year: staffYear,
+        imageUrl: staffImageUrl,
+        profilePdfUrl: staffProfilePdfUrl,
       }),
     });
 
@@ -394,13 +453,39 @@ function StaffPanel() {
 
     setStaffName("");
     setStaffSubject("");
+    setStaffDesignation("");
+    setStaffQualification("");
     setStaffDepartment("");
     setStaffYear("");
+    setStaffImageUrl("");
+    setStaffProfilePdfUrl("");
+    loadEditRecords("staffAssignments");
     showSuccess("Staff subject details updated for parents.");
   };
 
   const handleStudentPerformance = async (e) => {
     e.preventDefault();
+
+    if (!isValidEmail(studentEmail)) {
+      alert("Enter a valid student email.");
+      return;
+    }
+
+    if (!isValidEmail(parentEmail)) {
+      alert("Enter a valid parent email.");
+      return;
+    }
+
+    if (!isValidMonth(performanceMonth)) {
+      alert("Select a valid month.");
+      return;
+    }
+
+    const numericAttendance = Number(attendancePercentage);
+    if (Number.isNaN(numericAttendance) || numericAttendance < 0 || numericAttendance > 100) {
+      alert("Attendance percentage must be between 0 and 100.");
+      return;
+    }
 
     const parsedSubjects = parseSubjectMarks(subjectMarksInput);
 
@@ -409,15 +494,20 @@ function StaffPanel() {
       return;
     }
 
-    const res = await fetch("http://localhost:5000/api/student-performance", {
-      method: "POST",
+    const url = editingPerformanceId
+      ? `http://localhost:5000/api/student-performance/${editingPerformanceId}`
+      : "http://localhost:5000/api/student-performance";
+    const method = editingPerformanceId ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method,
       headers: authHeaders,
       body: JSON.stringify({
         studentName,
         studentEmail,
         parentEmail,
         month: performanceMonth,
-        attendancePercentage: Number(attendancePercentage),
+        attendancePercentage: numericAttendance,
         subjects: parsedSubjects,
       }),
     });
@@ -427,22 +517,80 @@ function StaffPanel() {
     }
 
     if (!res.ok) {
-      const data = await res.json();
-      alert(data.message || "Failed to save student performance");
+      const message = await extractErrorMessage(
+        res,
+        editingPerformanceId ? "Failed to update student performance" : "Failed to save student performance"
+      );
+      alert(message);
       return;
     }
 
-    setStudentName("");
-    setStudentEmail("");
-    setParentEmail("");
-    setPerformanceMonth("");
-    setAttendancePercentage("");
-    setSubjectMarksInput("");
-    showSuccess("Student performance updated for parent dashboard.");
+    resetPerformanceForm();
+    loadPerformanceRecords();
+    showSuccess(
+      editingPerformanceId
+        ? "Student performance updated in DB."
+        : "Student performance updated for parent and student dashboards."
+    );
+  };
+
+  const handleEditPerformance = (record) => {
+    setEditingPerformanceId(record._id);
+    setStudentName(record.studentName || "");
+    setStudentEmail(record.studentEmail || "");
+    setParentEmail(record.parentEmail || "");
+    setPerformanceMonth(record.month || "");
+    setAttendancePercentage(String(record.attendancePercentage ?? ""));
+    setSubjectMarksInput(formatSubjectMarks(record.subjects || []));
+  };
+
+  const handleDeletePerformance = async (recordId) => {
+    const confirmed = window.confirm("Delete this student performance record?");
+    if (!confirmed) {
+      return;
+    }
+
+    const res = await fetch(`http://localhost:5000/api/student-performance/${recordId}`, {
+      method: "DELETE",
+      headers: authHeaders,
+    });
+
+    if (handleAuthFailure(res)) {
+      return;
+    }
+
+    if (!res.ok) {
+      const message = await extractErrorMessage(res, "Failed to delete student performance");
+      alert(message);
+      return;
+    }
+
+    setPerformanceRecords((prev) => prev.filter((item) => item._id !== recordId));
+    if (editingPerformanceId === recordId) {
+      resetPerformanceForm();
+    }
+
+    loadPerformanceRecords();
+    showSuccess("Student performance removed from DB.");
   };
 
   const handleStudentRecordSubmit = async (e) => {
     e.preventDefault();
+
+    if (isEmpty(studentRecordName)) {
+      alert("Student name is required.");
+      return;
+    }
+
+    if (!isValidEmail(studentRecordEmail)) {
+      alert("Enter a valid student email.");
+      return;
+    }
+
+    if (!isValidEmail(studentRecordParentEmail)) {
+      alert("Enter a valid parent email.");
+      return;
+    }
 
     const payload = {
       name: studentRecordName,
@@ -688,8 +836,12 @@ function StaffPanel() {
             <form onSubmit={handleStaffAssignment}>
               <input className={styles.input} placeholder="Staff Name" value={staffName} onChange={(e) => setStaffName(e.target.value)} required />
               <input className={styles.input} placeholder="Subject" value={staffSubject} onChange={(e) => setStaffSubject(e.target.value)} required />
+              <input className={styles.input} placeholder="Designation (optional)" value={staffDesignation} onChange={(e) => setStaffDesignation(e.target.value)} />
+              <input className={styles.input} placeholder="Qualification (optional)" value={staffQualification} onChange={(e) => setStaffQualification(e.target.value)} />
               <input className={styles.input} placeholder="Department (optional)" value={staffDepartment} onChange={(e) => setStaffDepartment(e.target.value)} />
               <input className={styles.input} placeholder="Year (optional)" value={staffYear} onChange={(e) => setStaffYear(e.target.value)} />
+              <input className={styles.input} placeholder="Image URL (optional)" value={staffImageUrl} onChange={(e) => setStaffImageUrl(e.target.value)} />
+              <input className={styles.input} placeholder="Profile PDF URL (optional)" value={staffProfilePdfUrl} onChange={(e) => setStaffProfilePdfUrl(e.target.value)} />
               <button className={styles.button} type="submit">Add Staff Subject</button>
             </form>
           </div>
@@ -703,8 +855,42 @@ function StaffPanel() {
               <input className={styles.input} type="month" value={performanceMonth} onChange={(e) => setPerformanceMonth(e.target.value)} required />
               <input className={styles.input} type="number" min="0" max="100" placeholder="Attendance Percentage" value={attendancePercentage} onChange={(e) => setAttendancePercentage(e.target.value)} required />
               <input className={styles.input} placeholder="Subject Marks (Math:80, Physics:75)" value={subjectMarksInput} onChange={(e) => setSubjectMarksInput(e.target.value)} required />
-              <button className={styles.button} type="submit">Save Performance</button>
+              <button className={styles.button} type="submit">{editingPerformanceId ? "Update Performance" : "Save Performance"}</button>
+              {editingPerformanceId && (
+                <button type="button" className={styles.secondaryButton} onClick={resetPerformanceForm}>
+                  Cancel Edit
+                </button>
+              )}
             </form>
+            {isLoadingPerformanceRecords && <p className={styles.emptyText}>Loading performance records...</p>}
+            {!isLoadingPerformanceRecords && performanceRecords.length === 0 && (
+              <p className={styles.emptyText}>No performance records yet.</p>
+            )}
+            {!isLoadingPerformanceRecords && performanceRecords.length > 0 && (
+              <ul className={styles.list}>
+                {performanceRecords.map((record) => (
+                  <li key={record._id} className={styles.listItem}>
+                    <div>
+                      <strong>{record.studentName}</strong> ({record.studentEmail})
+                      <div className={styles.meta}>
+                        Month: {record.month} | Attendance: {record.attendancePercentage}% | Overall: {record.overallPercentage}%
+                      </div>
+                      <div className={styles.meta}>
+                        Subjects: {formatSubjectMarks(record.subjects || [])}
+                      </div>
+                    </div>
+                    <div className={styles.actions}>
+                      <button type="button" className={styles.smallButton} onClick={() => handleEditPerformance(record)}>
+                        Edit
+                      </button>
+                      <button type="button" className={styles.smallDeleteButton} onClick={() => handleDeletePerformance(record._id)}>
+                        Delete
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div className={styles.card}>

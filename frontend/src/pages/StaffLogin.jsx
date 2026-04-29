@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import styles from "./AuthPage.module.css";
+import { isValidEmail, isEmpty } from "../utils/validators";
 
 function StaffLogin() {
   const [email, setEmail] = useState("");
@@ -10,6 +11,16 @@ function StaffLogin() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    if (!isValidEmail(email)) {
+      alert("Enter a valid email address.");
+      return;
+    }
+
+    if (isEmpty(password)) {
+      alert("Password is required.");
+      return;
+    }
 
     const res = await fetch("http://localhost:5000/api/login/staff", {
       method: "POST",
@@ -20,8 +31,8 @@ function StaffLogin() {
     const data = await res.json();
 
     if (res.ok) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.user.role);
+      localStorage.setItem("token_staff", data.token);
+      localStorage.setItem("role_staff", data.user.role);
       navigate("/staff-dashboard");
     } else {
       alert(data.message || "Login failed");

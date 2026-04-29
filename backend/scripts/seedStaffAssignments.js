@@ -45,14 +45,6 @@ const assignments = [
     profilePdfUrl: "https://avccengg.net/documents/Profilepdf/VE.pdf",
   },
   {
-    staffName: "Ms.R.Valampuranayaki",
-    subject: "OOPS",
-    qualification: "M.Tech(CSE)",
-    designation: "Assistant Professor",
-    imageUrl: "/staff/ms-r-valampuranayaki.jpg",
-    profilePdfUrl: "https://avccengg.net/documents/Profilepdf/RV.pdf",
-  },
-  {
     staffName: "Mr.N.P.K.Ganesh Kumar",
     subject: "Big Data",
     qualification: "M.E., (Ph.D)",

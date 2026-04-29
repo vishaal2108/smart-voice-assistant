@@ -2,6 +2,28 @@ const express = require("express");
 const router = express.Router();
 const Timetable = require("../models/Timetable");
 const { authenticateToken, authorizeRoles } = require("../middleware/authMiddleware");
+const {
+  trimString,
+  requireFields,
+  requireObjectIdParam,
+} = require("../utils/validators");
+
+const validateTimetablePayload = (req, res) => {
+  const requiredFields = ["day", "subject", "time"];
+  requiredFields.forEach((field) => {
+    if (typeof req.body[field] === "string") {
+      req.body[field] = trimString(req.body[field]);
+    }
+  });
+
+  const result = requireFields(req.body, requiredFields);
+  if (!result.ok) {
+    res.status(400).json({ message: result.message });
+    return false;
+  }
+
+  return true;
+};
 
 // Add timetable (staff only)
 router.post(
@@ -10,6 +32,10 @@ router.post(
   authorizeRoles("staff"),
   async (req, res) => {
     try {
+      if (!validateTimetablePayload(req, res)) {
+        return;
+      }
+
       const newEntry = new Timetable(req.body);
       await newEntry.save();
       res.status(201).json({ message: "Timetable added" });
@@ -46,6 +72,15 @@ router.put(
   authorizeRoles("staff"),
   async (req, res) => {
     try {
+      const idCheck = requireObjectIdParam(req.params.id, "id");
+      if (!idCheck.ok) {
+        return res.status(400).json({ message: idCheck.message });
+      }
+
+      if (!validateTimetablePayload(req, res)) {
+        return;
+      }
+
       const updated = await Timetable.findByIdAndUpdate(req.params.id, req.body, {
         new: true,
         runValidators: true,
@@ -68,6 +103,11 @@ router.delete(
   authorizeRoles("staff"),
   async (req, res) => {
     try {
+      const idCheck = requireObjectIdParam(req.params.id, "id");
+      if (!idCheck.ok) {
+        return res.status(400).json({ message: idCheck.message });
+      }
+
       const deleted = await Timetable.findByIdAndDelete(req.params.id);
 
       if (!deleted) {

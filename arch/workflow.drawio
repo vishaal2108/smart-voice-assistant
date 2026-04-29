@@ -1,0 +1,52 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36" version="29.6.6">
+  <diagram id="workflow" name="workflow">
+    <mxGraphModel dx="1580" dy="887" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" background="#FFFFFF" math="0" shadow="0" adaptiveColors="none">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=18;fontStyle=1;fontFamily=Times New Roman;labelBackgroundColor=none;rounded=0;" value="&lt;h2&gt;SMART VOICE ASSISTANT&lt;/h2&gt;" vertex="1">
+          <mxGeometry height="40" width="600" x="179" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="student" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=18;labelBackgroundColor=none;" value="&lt;b&gt;Users (Student/Staff/Parent)&lt;br&gt;&lt;/b&gt;Voice Query&lt;br&gt;&amp;nbsp;Dashboard Access" vertex="1">
+          <mxGeometry height="90" width="450" x="254" y="215" as="geometry" />
+        </mxCell>
+        <mxCell id="webui" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=18;labelBackgroundColor=none;" value="&lt;b&gt;Frontend UI (React and Vite)&lt;br&gt;&lt;/b&gt;Web Speech (STT/TTS)&lt;br&gt;Student/Staff/Parent Dashboards" vertex="1">
+          <mxGeometry height="115" width="450" x="254" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="api" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=18;labelBackgroundColor=none;" value="&lt;b&gt;API Gateway&lt;br&gt;&lt;/b&gt;&amp;nbsp;Express REST Server&lt;br&gt;&amp;nbsp;Academic Routes&lt;br&gt;&amp;nbsp;Command Router" vertex="1">
+          <mxGeometry height="100" width="450" x="254" y="465" as="geometry" />
+        </mxCell>
+        <mxCell id="auth" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=18;labelBackgroundColor=none;" value="&lt;b&gt;Authentication &amp;amp; RBAC (JWT)&lt;br&gt;&lt;/b&gt;&amp;nbsp;Role Checks&lt;br&gt;Protected Routes" vertex="1">
+          <mxGeometry height="90" width="450" x="254" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="intent" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=18;labelBackgroundColor=none;" value="&lt;b&gt;Intent Handler (Rule-based)&lt;br&gt;&lt;/b&gt;&amp;nbsp;Keyword Matching&lt;br&gt;&amp;nbsp;Subject Extraction&lt;br&gt;&amp;nbsp;Response Formatter" vertex="1">
+          <mxGeometry height="110" width="450" x="254" y="695" as="geometry" />
+        </mxCell>
+        <mxCell id="db" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=18;labelBackgroundColor=none;" value="&lt;b&gt;Database (MongoDB)&lt;/b&gt;&lt;br&gt;&amp;nbsp;Users, Students, Timetable&lt;br&gt;&amp;nbsp;Notices, Fees, Placements&lt;br&gt;Staff Assignments, Performance" vertex="1">
+          <mxGeometry height="120" width="450" x="254" y="825" as="geometry" />
+        </mxCell>
+        <mxCell id="admin" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=18;labelBackgroundColor=none;" value="&lt;b&gt;Staff Panel&lt;br&gt;&lt;/b&gt;&amp;nbsp;Content Updates" vertex="1">
+          <mxGeometry height="120" width="180" x="54" y="825" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="student" style="endArrow=block;html=1;fontFamily=Times New Roman;fontSize=18;labelBackgroundColor=none;fontColor=default;rounded=0;" target="webui">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="webui" style="endArrow=block;html=1;fontFamily=Times New Roman;fontSize=18;labelBackgroundColor=none;fontColor=default;rounded=0;" target="api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="api" style="endArrow=block;html=1;fontFamily=Times New Roman;fontSize=18;labelBackgroundColor=none;fontColor=default;rounded=0;" target="auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="auth" style="endArrow=block;html=1;fontFamily=Times New Roman;fontSize=18;labelBackgroundColor=none;fontColor=default;rounded=0;" target="intent">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="intent" style="endArrow=block;html=1;fontFamily=Times New Roman;fontSize=18;labelBackgroundColor=none;fontColor=default;rounded=0;" target="db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="admin" style="endArrow=block;html=1;fontFamily=Times New Roman;fontSize=18;labelBackgroundColor=none;fontColor=default;rounded=0;" target="db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

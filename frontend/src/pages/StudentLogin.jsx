@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import styles from "./AuthPage.module.css";
+import { isValidEmail, isEmpty } from "../utils/validators";
 
 function StudentLogin() {
   const [email, setEmail] = useState("");
@@ -10,6 +11,16 @@ function StudentLogin() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    if (!isValidEmail(email)) {
+      alert("Enter a valid email address.");
+      return;
+    }
+
+    if (isEmpty(password)) {
+      alert("Password is required.");
+      return;
+    }
 
     const res = await fetch("http://localhost:5000/api/login/student", {
       method: "POST",
@@ -20,8 +31,8 @@ function StudentLogin() {
     const data = await res.json();
 
     if (res.ok) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.user.role);
+      localStorage.setItem("token_student", data.token);
+      localStorage.setItem("role_student", data.user.role);
       navigate("/student-dashboard");
     } else {
       alert(data.message || "Login failed");
